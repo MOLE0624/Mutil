@@ -21,6 +21,7 @@ class NormMethod(Enum):
 def normalization(
     input_data, method, min_vals, max_vals, mean_vals=None, std_vals=None
 ):
+    input_data = jnp.array(input_data)
     min_vals = jnp.array(min_vals)
     max_vals = jnp.array(max_vals)
 
