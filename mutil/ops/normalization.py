@@ -23,7 +23,7 @@ class NormMethod(Enum):
     jax.jit,
     static_argnums=(1, 2, 3),
 )
-def _normalization(
+def _normalize(
     input_data: np.ndarray,
     method: NormMethod,
     min_vals: tuple,  # np.ndarray,
@@ -54,7 +54,7 @@ def _normalization(
         return (minmax - mean_vals[None, :, None, None]) / std_vals[None, :, None, None]
 
 
-def normalization(
+def normalize(
     input_data: np.ndarray,
     method: NormMethod,
     min_vals: tuple,
@@ -62,6 +62,6 @@ def normalization(
     mean_vals=None,
     std_vals=None,
 ):
-    return _normalization(
+    return _normalize(
         input_data, method, min_vals, max_vals, mean_vals, std_vals
     ).block_until_ready()
