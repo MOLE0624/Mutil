@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Math"
+version = "0.0.1"
+description = "A mathematical operations library using JAX"
+authors = [{ name = "MOLE0624" }]
+license = { text = "MIT" }
+dependencies = [
+    "numpy",
+    "scipy",
+    "jax",
+    "matplotlib"
+]
+requires-python = ">=3.7"
+
+[tool.setuptools]
+packages = ["ops", "utils"]
