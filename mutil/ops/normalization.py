@@ -6,9 +6,11 @@
 # ================================================================================
 
 from enum import Enum
+from functools import partial
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 
 
 class NormMethod(Enum):
@@ -17,29 +19,49 @@ class NormMethod(Enum):
     COMPOUND = "compound"
 
 
-@jax.jit
-def normalization(
-    input_data, method, min_vals, max_vals, mean_vals=None, std_vals=None
+@partial(
+    jax.jit,
+    static_argnums=(1, 2, 3),
+)
+def _normalization(
+    input_data: np.ndarray,
+    method: NormMethod,
+    min_vals: tuple,  # np.ndarray,
+    max_vals: tuple,  # np.ndarray,
+    mean_vals=None,
+    std_vals=None,
 ):
+    # Convert lists to tuples if they are passed as lists
     input_data = jnp.array(input_data)
     min_vals = jnp.array(min_vals)
     max_vals = jnp.array(max_vals)
+    mean_vals = jnp.array(mean_vals) if mean_vals is not None else None
+    std_vals = jnp.array(std_vals) if std_vals is not None else None
 
     if method == NormMethod.MINMAX:
-        # Broadcasting optimization
         return (input_data - min_vals[None, :, None, None]) / (
             max_vals[None, :, None, None] - min_vals[None, :, None, None]
         )
     elif method == NormMethod.ZSCORE:
-        mean_vals = jnp.array(mean_vals)
-        std_vals = jnp.array(std_vals)
-        # Broadcasting optimization
         return (input_data - mean_vals[None, :, None, None]) / std_vals[
             None, :, None, None
         ]
     elif method == NormMethod.COMPOUND:
-        minmax = normalization(input_data, NormMethod.MINMAX, min_vals, max_vals)
-        # Broadcasting optimization
+        # Combine MINMAX and ZSCORE normalization
+        minmax = (input_data - min_vals[None, :, None, None]) / (
+            max_vals[None, :, None, None] - min_vals[None, :, None, None]
+        )
         return (minmax - mean_vals[None, :, None, None]) / std_vals[None, :, None, None]
-    else:
-        raise ValueError("Unknown normalization method")
+
+
+def normalization(
+    input_data: np.ndarray,
+    method: NormMethod,
+    min_vals: tuple,
+    max_vals: tuple,
+    mean_vals=None,
+    std_vals=None,
+):
+    return _normalization(
+        input_data, method, min_vals, max_vals, mean_vals, std_vals
+    ).block_until_ready()
