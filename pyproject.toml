@@ -12,4 +12,4 @@ requires-python = ">=3.7"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["mutil"]  # Ensure all submodules under "mutil" are included
+include = ["mutil*"]  # Ensure all submodules under "mutil" are included
